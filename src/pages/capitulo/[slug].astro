@@ -1,0 +1,193 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Frame from '../../components/Frame.astro';
+import MapView from '../../components/MapView.astro';
+import PlaceList from '../../components/PlaceList.astro';
+import { chapters, days, chapterBySlug } from '../../data/trip';
+import { images, unsplash } from '../../data/images';
+import { mapsSearch } from '../../data/maps';
+import { u, accentOf, timecode } from '../../data/url';
+
+export function getStaticPaths() { return chapters.map((c) => ({ params: { slug: c.slug } })); }
+const { slug } = Astro.params;
+const c = chapterBySlug(slug!)!;
+const idx = chapters.findIndex((x) => x.slug === c.slug);
+const prev = chapters[idx - 1];
+const next = c.next ? chapterBySlug(c.next) : undefined;
+const chapterDays = days.filter((d) => d.chapter === c.slug);
+const base = c.places.find((p) => p.category === 'base');
+const accent = accentOf(c.slug);
+const markers = c.places.map((p) => ({ name: p.name, lat: p.lat, lng: p.lng, blurb: p.blurb, kind: p.category === 'base' ? 'base' : p.category === 'trabalho' ? 'trabalho' : 'lugar', href: mapsSearch(p) } as const));
+const firstDay = chapterDays[0]?.n ?? 0;
+---
+
+<BaseLayout title={c.title} description={c.lead} image={unsplash(images[c.hero], 1200)} accent={accent} current={u(`/capitulo/${c.slug}`)}>
+  <!-- barra de cenas -->
+  <nav class="scenes wrap" aria-label="Cenas">
+    {chapters.map((x) => (
+      <a href={u(`/capitulo/${x.slug}`)} class:list={['scenes__i tc', { on: x.slug === c.slug, done: chapters.indexOf(x) < idx }]} style={`--c:${accentOf(x.slug)}`} title={x.title}>{x.number}</a>
+    ))}
+    <span class="tc scenes__label"><span class="on">{c.act}</span> · {c.beat} · cena {c.number} de 06</span>
+  </nav>
+
+  <!-- abertura -->
+  <header class="open wrap">
+    <div class="rv">
+      <Frame k={c.hero} eager rec tl={`REC · CENA ${c.number}`} tr={`TC ${timecode(firstDay)}`} bl={`${c.flag} ${c.city}`} br={`${c.dates} · ${c.nights}N`} />
+    </div>
+    <div class="open__text">
+      <h1 class="t-hero">{c.title}<span class="accent">.</span></h1>
+      <p class="t-lead open__lead">{c.lead}</p>
+    </div>
+    <dl class="slate__grid">
+      <div><dt class="tc">datas</dt><dd>{c.dates}</dd></div>
+      <div><dt class="tc">noites</dt><dd>{String(c.nights).padStart(2, '0')}</dd></div>
+      <div><dt class="tc">base</dt><dd>{c.base}</dd></div>
+      <div><dt class="tc">transporte</dt><dd>{c.transport}</dd></div>
+    </dl>
+  </header>
+
+  <!-- roteiro (texto) -->
+  <section class="wrap section grid-2">
+    <div>
+      <p class="tc">int. / ext. · {c.city.toUpperCase()}</p>
+      <blockquote class="quote t-m rv-f">“{c.quote}”</blockquote>
+    </div>
+    <div class="prose rv-f">
+      {c.paragraphs.map((p) => <p>{p}</p>)}
+    </div>
+  </section>
+
+  <!-- referência -->
+  <section class="wrap ref rv-f">
+    <p class="tc">referência de imagem</p>
+    <p class="t-m" style="margin-top:.8rem; max-width:52ch; font-weight:500">{c.film.sentence}</p>
+    <ul class="ref__list">{c.film.titles.map((t) => <li class="tc-lg">▸ {t}</li>)}</ul>
+  </section>
+
+  <!-- stills -->
+  {c.gallery.length > 1 && (
+    <section class="wrap section">
+      <p class="tc" style="margin-bottom:1.2rem">stills de referência · a substituir por material próprio</p>
+      <div class="stills">
+        {c.gallery.slice(1).map((k, i) => (
+          <div class:list={['rv', { wide: i === 0 }]}><Frame k={k} ratio={i === 0 ? 'scope' : '16'} tl={`STILL ${String(i + 1).padStart(2, '0')}`} caption="" /></div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- ordem do dia -->
+  <section class="wrap section">
+    <div class="slate-row">
+      <div>
+        <p class="tc">ordem do dia</p>
+        <h2 class="t-l" style="margin-top:.4rem">{String(chapterDays.length).padStart(2, '0')} {chapterDays.length === 1 ? 'diária' : 'diárias'} nesta cena.</h2>
+      </div>
+      <p class="tc"><span class="dot leve"></span> leve &nbsp; <span class="dot médio"></span> médio &nbsp; <span class="dot pesado"></span> pesado &nbsp; <span class="dot trânsito"></span> trânsito</p>
+    </div>
+    <ol class="od">
+      {chapterDays.map((d) => (
+        <li class="od__i rv-f">
+          <div class="od__head">
+            <span class="tc"><span class="on">D{String(d.n).padStart(2, '0')}</span> · {d.weekday} {d.date.slice(8)}/{d.date.slice(5, 7)}</span>
+            <span class="tc"><span class:list={['dot', d.intensity]}></span> {d.intensity}</span>
+          </div>
+          <h3 class="t-m" style="font-size:1.35rem">{d.title}</h3>
+          {d.fixed && <p class="tag accent od__fixed">{d.fixed}</p>}
+          <div class="od__blocks">
+            {d.morning && <p><span class="tc">manhã</span>{d.morning}</p>}
+            {d.afternoon && <p><span class="tc">tarde</span>{d.afternoon}</p>}
+            {d.night && <p><span class="tc">noite</span>{d.night}</p>}
+          </div>
+          {d.status === 'esboço' && <p class="tc muted" style="margin-top:.7rem">esboço · muda com clima, cansaço e boas ideias</p>}
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <!-- locações -->
+  <section class="wrap section">
+    <div class="slate-row">
+      <div>
+        <p class="tc">locações</p>
+        <h2 class="t-l" style="margin-top:.4rem">Lugares com identidade, não checklist.</h2>
+      </div>
+      <p class="tc">pino claro · base &nbsp; pino âmbar · trabalho &nbsp; pino cor da cena · lugar</p>
+    </div>
+    <MapView id={`map-${c.slug}`} markers={markers} center={c.center} fit />
+    <div style="height:2rem"></div>
+    <PlaceList places={c.places} base={base} scene={c.number} />
+  </section>
+
+  <!-- trilha -->
+  <section class="wrap section">
+    <p class="tc">trilha</p>
+    <h2 class="t-l" style="margin:.4rem 0 1.5rem">O que toca enquanto a cena passa.</h2>
+    <ol class="tr">
+      {c.soundtrack.map((t, i) => (
+        <li class="tr__i rv-f">
+          <span class="tc">{String(i + 1).padStart(2, '0')}</span>
+          <span><strong>{t.title}</strong> <span class="muted">· {t.artist}</span></span>
+          <span class="muted">{t.reason}</span>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <!-- próxima cena -->
+  <section class="wrap section nxt">
+    <div>{prev && <a href={u(`/capitulo/${prev.slug}`)} class="tc lnk">← cena {prev.number} · {prev.title}</a>}</div>
+    <div>
+      <p class="tc">{next ? 'próxima cena' : 'fim'}</p>
+      {next ? (
+        <a href={u(`/capitulo/${next.slug}`)} class="t-xl nxt__link" style={`--accent:${accentOf(next.slug)}`}>{next.title} →</a>
+      ) : (
+        <a href={u('/')} class="t-xl nxt__link">Voltar ao início →</a>
+      )}
+      <p class="muted" style="max-width:46ch; margin-top:1rem">{next ? next.lead : 'Funchal, Lisboa, São Paulo. O caderno fecha aqui. O filme começa depois.'}</p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .scenes { display: flex; align-items: center; gap: 0.4rem; padding-block: 1.2rem; flex-wrap: wrap; }
+  .scenes__i { width: 2.4rem; height: 2.4rem; display: grid; place-items: center; border: 1px solid var(--line-strong); color: var(--muted); transition: all 240ms; }
+  .scenes__i.done { color: var(--text-2); border-color: var(--line-strong); background: var(--panel); }
+  .scenes__i.on { background: var(--c); border-color: var(--c); color: var(--black); }
+  .scenes__i:hover { border-color: var(--c); color: var(--c); }
+  .scenes__i.on:hover { color: var(--black); }
+  .scenes__label { margin-left: 1rem; }
+
+  .open { padding-block: 0.5rem 2rem; }
+  .open__text { padding-block: 2.5rem 2rem; }
+  .open__lead { max-width: 52ch; margin-top: 1.5rem; }
+  .slate__grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem 1rem; margin: 0; padding-block: 1.4rem; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .slate__grid dd { margin: 0.35rem 0 0; font-family: var(--font-display); font-size: 1.1rem; letter-spacing: -0.02em; }
+  @media (min-width: 800px) { .slate__grid { grid-template-columns: repeat(4, 1fr); } }
+
+  .quote { margin: 1rem 0 0; color: var(--accent); max-width: 22ch; font-weight: 500; }
+  .ref { padding-block: 2rem 3rem; border-top: 1px solid var(--line); }
+  .ref__list { margin-top: 1.4rem; display: flex; flex-wrap: wrap; gap: 0.8rem 2rem; color: var(--text-2); }
+
+  .stills { display: grid; gap: 1.25rem; }
+  @media (min-width: 800px) { .stills { grid-template-columns: repeat(2, 1fr); } .stills .wide { grid-column: 1 / -1; } }
+
+  .od { display: grid; gap: 1.25rem; }
+  @media (min-width: 900px) { .od { grid-template-columns: repeat(2, 1fr); } }
+  .od__i { border: 1px solid var(--line); padding: 1.4rem; background: var(--panel); }
+  .od__head { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 0.8rem; }
+  .od__fixed { display: inline-block; margin-top: 0.6rem; }
+  .od__blocks { margin-top: 1rem; display: grid; gap: 0.6rem; }
+  .od__blocks p { display: grid; grid-template-columns: 4.2rem 1fr; gap: 0.8rem; font-size: 0.95rem; color: var(--text-2); }
+  .od__blocks .tc { padding-top: 0.2rem; }
+
+  .tr { border-top: 1px solid var(--line); }
+  .tr__i { display: grid; grid-template-columns: 2.5rem 1fr; gap: 0.5rem 1rem; padding: 1rem 0; border-bottom: 1px solid var(--line); }
+  @media (min-width: 800px) { .tr__i { grid-template-columns: 2.5rem 1.2fr 2fr; } }
+
+  .nxt { display: grid; gap: 2rem; }
+  @media (min-width: 800px) { .nxt { grid-template-columns: 1fr 2fr; } }
+  .nxt__link { display: inline-block; margin-top: 0.6rem; color: var(--accent); font-weight: 650; }
+  .nxt__link:hover { color: var(--text); }
+</style>

@@ -1,0 +1,110 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import MapView from '../components/MapView.astro';
+import { chapters, days, route } from '../data/trip';
+import { mapsSearch } from '../data/maps';
+import { u, accentOf } from '../data/url';
+
+const allPlaces = chapters.flatMap((c) => c.places.map((p) => ({ name: p.name, lat: p.lat, lng: p.lng, blurb: p.blurb, kind: p.category === 'base' ? 'base' : p.category === 'trabalho' ? 'trabalho' : 'lugar', chapter: c.title, href: mapsSearch(p) } as const)));
+const legs = [
+  { from: 'São Paulo', to: 'Londres', how: 'LATAM LA 8084 · 16/10 23:50 → 17/10 15:05', mode: 'voo', status: 'emitido' },
+  { from: 'Londres', to: 'Birmingham', how: 'Trem Euston → New Street · 22/10 · ~1h25', mode: 'trem', status: 'a comprar' },
+  { from: 'Birmingham', to: 'Manchester', how: 'Trem New Street → Piccadilly · 23/10 · ~1h30', mode: 'trem', status: 'a comprar' },
+  { from: 'Manchester', to: 'Bilbao', how: 'KLM via Amsterdã · 28/10 10:55 → 16:30', mode: 'voo', status: 'emitido' },
+  { from: 'Bilbao', to: 'San Sebastián', how: 'Carro · AP-8 · ~100 km · ~1h', mode: 'carro', status: 'a reservar' },
+  { from: 'Bilbao', to: 'Funchal', how: 'TAP via Lisboa · 31/10 12:25 → 17:10', mode: 'voo', status: 'emitido' },
+  { from: 'Funchal', to: 'Ponta Delgada', how: 'Carro · 39 km · ~37 min', mode: 'carro', status: 'a reservar' },
+  { from: 'Funchal', to: 'São Paulo', how: 'TAP via Lisboa · 05/11 18:10 → 06/11 manhã', mode: 'voo', status: 'emitido' },
+];
+---
+
+<BaseLayout title="A jornada" description="Mapa interativo e timeline dia a dia: 19 noites entre Londres, Birmingham, Manchester, San Sebastián e Madeira." current={u('/jornada')}>
+  <header class="wrap section" style="padding-bottom:2rem">
+    <p class="tc">a jornada</p>
+    <h1 class="t-hero" style="margin-top:.6rem">Dezenove<br />noites<span class="accent">.</span></h1>
+    <p class="t-lead" style="max-width:56ch; margin-top:2rem">Três atos, sem forçar a metáfora: o mundo comum é Londres, o mentor mora em Birmingham, a provação tem apito final, a virada acontece no País Basco e o tesouro fica numa floresta de loureiros.</p>
+  </header>
+
+  <section class="wrap acts">
+    {chapters.map((c) => (
+      <a href={u(`/capitulo/${c.slug}`)} class="acts__i rv-f" style={`--accent:${accentOf(c.slug)}`}>
+        <span class="tc"><span class="on">{c.act}</span></span>
+        <span class="acts__n">{c.number}</span>
+        <span class="t-m" style="font-size:1.2rem">{c.title}</span>
+        <span class="tc">{c.beat} · {c.nights}n</span>
+      </a>
+    ))}
+  </section>
+
+  <section class="wrap section">
+    <div class="slate-row">
+      <div><p class="tc">mapa</p><h2 class="t-l" style="margin-top:.4rem">Todas as locações, todas as bases.</h2></div>
+      <p class="tc">pino claro · base &nbsp; âmbar · trabalho &nbsp; linha · rota</p>
+    </div>
+    <MapView id="map-all" markers={allPlaces} route={route} center={{ lat: 44, lng: -8, zoom: 5 }} fit animate />
+  </section>
+
+  <section class="wrap section" style="padding-top:0">
+    <p class="tc">deslocamentos</p>
+    <h2 class="t-l" style="margin:.4rem 0 1.5rem">Oito trechos, três modos.</h2>
+    <ol class="legs">
+      {legs.map((l, i) => (
+        <li class="legs__i rv-f">
+          <span class="tc">{String(i + 1).padStart(2, '0')} · {l.mode}</span>
+          <span><strong>{l.from} → {l.to}</strong><br /><span class="muted">{l.how}</span></span>
+          <span class:list={['tag', { ok: l.status === 'emitido', warn: l.status !== 'emitido' }]}>{l.status}</span>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="wrap section" style="padding-top:0">
+    <div class="slate-row">
+      <div><p class="tc">ordem do dia · geral</p><h2 class="t-l" style="margin-top:.4rem">Vinte e um dias, do embarque ao pouso.</h2></div>
+      <p class="tc"><span class="dot leve"></span> leve &nbsp; <span class="dot médio"></span> médio &nbsp; <span class="dot pesado"></span> pesado &nbsp; <span class="dot trânsito"></span> trânsito</p>
+    </div>
+    <ol class="tl">
+      {days.map((d) => {
+        const c = chapters.find((x) => x.slug === d.chapter)!;
+        return (
+          <li class="tl__i rv-f" style={`--accent:${accentOf(c.slug)}`}>
+            <div class="tl__left">
+              <span class="tc">D{String(d.n).padStart(2, '0')}</span>
+              <span class="tl__date">{d.date.slice(8)}<span class="tc">/{d.date.slice(5, 7)} · {d.weekday}</span></span>
+              <span class:list={['dot', d.intensity]} title={d.intensity}></span>
+            </div>
+            <div>
+              <p class="tc"><a class="lnk on" href={u(`/capitulo/${c.slug}`)}>{c.flag} {d.city}</a>{d.fixed && <span> · {d.fixed}</span>}</p>
+              <h3 class="t-m" style="font-size:1.35rem; margin-top:.3rem">{d.title}</h3>
+              <div class="tl__blocks">
+                {d.morning && <p><span class="tc">manhã</span>{d.morning}</p>}
+                {d.afternoon && <p><span class="tc">tarde</span>{d.afternoon}</p>}
+                {d.night && <p><span class="tc">noite</span>{d.night}</p>}
+              </div>
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+    <p class="tc muted" style="margin-top:2rem">dias marcados como esboço mudam com clima, cansaço e boas ideias. voos, jogo e gravações não mudam.</p>
+  </section>
+</BaseLayout>
+
+<style>
+  .acts { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+  @media (min-width: 700px) { .acts { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1100px) { .acts { grid-template-columns: repeat(7, 1fr); } }
+  .acts__i { background: var(--black); padding: 1.2rem; display: flex; flex-direction: column; gap: 0.5rem; transition: background 300ms; }
+  .acts__i:hover { background: var(--panel); }
+  .acts__n { font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; letter-spacing: -0.05em; color: var(--accent); line-height: 1; }
+  .legs { border-top: 1px solid var(--line); }
+  .legs__i { display: grid; grid-template-columns: 7rem 1fr auto; gap: 1rem; align-items: center; padding: 1rem 0; border-bottom: 1px solid var(--line); }
+  .tl { border-top: 1px solid var(--line); }
+  .tl__i { display: grid; grid-template-columns: 6.5rem 1fr; gap: 1.5rem; padding: 1.5rem 0; border-bottom: 1px solid var(--line); }
+  .tl__left { display: flex; flex-direction: column; gap: 0.4rem; align-items: flex-start; }
+  .tl__date { font-family: var(--font-display); font-size: 2.2rem; font-weight: 650; letter-spacing: -0.04em; line-height: 1; }
+  .tl__blocks { margin-top: 0.9rem; display: grid; gap: 0.5rem; max-width: 70ch; }
+  .tl__blocks p { display: grid; grid-template-columns: 4.2rem 1fr; gap: 0.8rem; font-size: 0.95rem; color: var(--text-2); }
+  .tl__blocks .tc { padding-top: 0.2rem; }
+  @media (min-width: 900px) { .tl__i { grid-template-columns: 9rem 1fr; } }
+</style>

@@ -1,0 +1,40 @@
+---
+import { lastUpdate, chapters } from '../data/trip';
+import { u } from '../data/url';
+---
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr__top">
+      <p class="t-l" style="max-width:22ch; font-weight:600">Feito em São Paulo. Deslocado para o Atlântico Norte.</p>
+      <p class="tc">fim da bobina · última atualização {lastUpdate}</p>
+    </div>
+    <div class="ftr__grid">
+      <ul>
+        <li class="tc" style="margin-bottom:.8rem">capítulos</li>
+        {chapters.map((c) => (<li><a class="lnk" href={u(`/capitulo/${c.slug}`)}><span class="muted">{c.number}</span> {c.title}</a></li>))}
+      </ul>
+      <ul>
+        <li class="tc" style="margin-bottom:.8rem">mais</li>
+        <li><a class="lnk" href={u('/jornada')}>jornada, mapa e timeline</a></li>
+        <li><a class="lnk" href={u('/kit')}>kit</a></li>
+        <li><a class="lnk" href={u('/tripulacao')}>tripulação</a></li>
+        <li><a class="lnk" href={u('/bordo')}>bordo (privado)</a></li>
+        <li><a class="lnk" href={u('/colophon')}>colophon e créditos</a></li>
+      </ul>
+      <div>
+        <p class="tc" style="margin-bottom:.8rem">assinatura</p>
+        <p>Douglas Mendes · direção de fotografia · São Paulo</p>
+        <p class="muted" style="margin-top:.3rem">Hugo Lima · direção. Produções Rota.</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .ftr { border-top: 1px solid var(--line); padding: 4rem 0 3rem; margin-top: 4rem; }
+  .ftr__top { display: flex; justify-content: space-between; align-items: flex-end; gap: 2rem; flex-wrap: wrap; margin-bottom: 3rem; }
+  .ftr__grid { display: grid; gap: 2.5rem; grid-template-columns: 1fr; font-size: 0.95rem; }
+  .ftr__grid li + li { margin-top: 0.4rem; }
+  @media (min-width: 820px) { .ftr__grid { grid-template-columns: 1fr 1fr 1.4fr; } }
+</style>

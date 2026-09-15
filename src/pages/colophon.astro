@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { images } from '../data/images';
+import { u } from '../data/url';
+const uniq = [...new Map(Object.values(images).map((c) => [c.id, c])).values()];
+---
+
+<BaseLayout title="Colophon" description="Sobre o projeto, créditos das imagens e como este site foi feito." current={u('/colophon')}>
+  <header class="wrap section" style="padding-bottom:2rem">
+    <p class="tc">colophon · créditos finais</p>
+    <h1 class="t-hero" style="margin-top:.6rem">Como foi<br />feito<span class="accent">.</span></h1>
+  </header>
+
+  <section class="wrap grid-2 section" style="padding-top:0">
+    <p class="tc">o projeto</p>
+    <div class="prose">
+      <p>Este site é o caderno de bordo de uma viagem que começou como férias e virou dois trabalhos. É diário de campo, não blog; ensaio, não portfólio. Antes da viagem, funciona como antecipação. Durante, recebe atualizações leves. Depois, vira peça fechada com o material filmado e fotografado.</p>
+      <p>A estrutura em jornada do herói não é enfeite. Toda viagem longa tem prólogo, provação, virada e retorno, e organizar o roteiro assim ajudou a decidir o que cortar. Lisboa, Stonehenge e o bate-volta a Paris saíram porque não tinham função dramática. San Sebastián entrou porque tinha.</p>
+      <p>Segunda versão, setembro de 2026: linguagem de sala escura. Letterbox 2.39:1, timecode, claquete, ordem do dia. Tipografia Inter Tight nos títulos, Instrument Sans no corpo, JetBrains Mono nos rótulos. Astro, CSS puro, Leaflet sobre OpenStreetMap com os tiles invertidos. Publicado no GitHub Pages.</p>
+      <p>A área <a class="lnk accent" href={u('/bordo')}>/bordo</a> é privada: comprovantes, códigos de reserva e telefones de anfitrião, cifrados no navegador com uma senha que só a tripulação conhece.</p>
+    </div>
+  </section>
+
+  <section class="wrap section" style="padding-top:0">
+    <p class="tc" style="margin-bottom:1.2rem">créditos de imagem · unsplash · a substituir por material próprio</p>
+    <ul class="cred">
+      {uniq.map((c) => (<li><a class="lnk" href={`https://unsplash.com/@${c.author}`} target="_blank" rel="noopener">@{c.author}</a> <span class="muted">· {c.alt}</span></li>))}
+    </ul>
+    <p class="tc muted" style="margin-top:2rem">retratos da tripulação: acervo próprio. mapa: © openstreetmap contributors.</p>
+  </section>
+</BaseLayout>
+
+<style>
+  .cred { display: grid; gap: 0.5rem; font-size: 0.92rem; }
+  @media (min-width: 800px) { .cred { grid-template-columns: repeat(2, 1fr); } }
+</style>

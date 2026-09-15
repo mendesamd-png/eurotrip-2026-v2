@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { u } from '../data/url';
+---
+
+<BaseLayout title="Tripulação" description="A parte boa de viajar com alguém é ter uma testemunha. A parte ruim é ter uma testemunha." current={u('/tripulacao')}>
+  <header class="wrap section" style="padding-bottom:2rem">
+    <p class="tc">tripulação · ficha técnica</p>
+    <h1 class="t-hero" style="margin-top:.6rem">Dois<br />brasileiros<span class="accent">.</span></h1>
+    <p class="t-lead" style="max-width:50ch; margin-top:2rem">Duas câmeras e nenhuma certeza sobre o peso da mochila. A parte boa de viajar com alguém é ter uma testemunha. A parte ruim é ter uma testemunha.</p>
+  </header>
+
+  <section class="wrap crew">
+    <article class="crew__i rv">
+      <div class="frame r45"><img src={u('/images/crew/douglas.jpg')} alt="Retrato de Douglas Mendes" loading="lazy" /><span class="corner tl">DOP</span><span class="corner br">SÃO PAULO</span></div>
+      <p class="tc" style="margin-top:1.2rem"><span class="on">direção de fotografia</span></p>
+      <h2 class="t-xl" style="margin-top:.4rem; font-size:clamp(2rem,4.5vw,4rem)">Douglas Mendes</h2>
+      <p class="muted" style="margin-top:1rem; max-width:44ch">Cineasta, planejador compulsivo de viagens, dono do equipamento caro, responsável por achar que tudo vai caber em duas mochilas. Vai filmar até quando a câmera disser que não dá mais. Provavelmente vai discutir com algum funcionário de cinema sobre lugar marcado.</p>
+    </article>
+    <article class="crew__i rv">
+      <div class="frame r45"><img src={u('/images/crew/hugo.png')} alt="Retrato de Hugo Lima" loading="lazy" /><span class="corner tl">DIR</span><span class="corner br">SÃO PAULO</span></div>
+      <p class="tc" style="margin-top:1.2rem"><span class="on">direção e guarda da planilha</span></p>
+      <h2 class="t-xl" style="margin-top:.4rem; font-size:clamp(2rem,4.5vw,4rem)">Hugo Lima</h2>
+      <p class="muted" style="margin-top:1rem; max-width:44ch">Ator, diretor dos dois trabalhos da viagem e a pessoa que, em teoria, vai ficar atento à planilha (em teoria). Responsável por traduzir a empolgação do Douglas em decisões viáveis e por lembrar que jantar também é parte do roteiro. Vai dizer “podia ser pior” pelo menos uma vez por dia. Provavelmente vai estar certo.</p>
+    </article>
+  </section>
+
+  <section class="wrap section">
+    <p class="tc" style="margin-bottom:1.2rem">elenco de apoio</p>
+    <ul class="support">
+      <li><strong>Gustavo</strong><br /><span class="muted">Birmingham. O mentor. Hospeda uma noite, guarda as encomendas e talvez pegue o trem para o show em Manchester.</span></li>
+      <li><strong>Max Lamb</strong><br /><span class="muted">Londres. Designer, metade de “A Tree Doesn't Die Twice” na Gallery FUMI. Meia diária diante da câmera.</span></li>
+      <li><strong>Miriam Badaró</strong><br /><span class="muted">San Sebastián. Sorgin Gallery, “A que faz nascer”. A virada da viagem: chamou, hospedou e pagou as passagens do desvio.</span></li>
+      <li><strong>Nelson</strong><br /><span class="muted">Ponta Delgada. Anfitrião da Beco House, a última casa da viagem.</span></li>
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .crew { display: grid; gap: 3rem; }
+  @media (min-width: 800px) { .crew { grid-template-columns: 1fr 1fr; gap: 4rem; } }
+  .crew__i .frame img { filter: grayscale(1) contrast(1.12); }
+  .support { display: grid; gap: 1.5rem; }
+  @media (min-width: 800px) { .support { grid-template-columns: repeat(2, 1fr); } }
+</style>

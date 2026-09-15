@@ -1,0 +1,130 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { u } from '../data/url';
+---
+
+<BaseLayout title="Bordo" description="Área privada da tripulação." noindex current={u('/bordo')}>
+  <div id="enc" data-enc={u('/bordo.enc')} hidden></div>
+  <section class="wrap section" id="gate">
+    <p class="tc">bordo · área privada</p>
+    <h1 class="t-hero" style="max-width:12ch; margin-top:.5rem">Só a tripulação passa daqui.</h1>
+    <p class="t-lead" style="max-width:48ch; margin-top:2rem">Códigos de reserva, telefones de anfitrião, horários que não podem falhar e os comprovantes em PDF. Tudo cifrado no navegador. Nada disto existe em texto aberto no servidor.</p>
+    <form id="form" class="gate__form" autocomplete="off">
+      <label class="tc" for="pw">senha da tripulação</label>
+      <div class="gate__row">
+        <input id="pw" type="password" required minlength="8" autocomplete="current-password" />
+        <button class="btn solid" type="submit">abrir o bordo</button>
+      </div>
+      <p id="msg" class="tc" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <section class="wrap" id="deck" hidden>
+    <div class="flex between" style="margin-bottom:3rem">
+      <div>
+        <p class="tc">bordo · aberto</p>
+        <h1 class="t-xl" style="margin-top:.3rem">Caderno de bordo.</h1>
+      </div>
+      <button class="btn" id="lock">fechar</button>
+    </div>
+    <p class="tc muted" id="notice" style="margin-bottom:2rem"></p>
+
+    <h2 class="t-m sec">Voos</h2>
+    <div id="voos" class="cards"></div>
+
+    <h2 class="t-m sec">Hospedagens</h2>
+    <div id="hosp" class="cards"></div>
+
+    <h2 class="t-m sec">Ingressos</h2>
+    <div id="ing" class="cards"></div>
+
+    <h2 class="t-m sec">Documentos e pendências</h2>
+    <ul id="docs" class="list"></ul>
+
+    <h2 class="t-m sec">Contatos</h2>
+    <ul id="cont" class="list"></ul>
+
+    <h2 class="t-m sec">Comprovantes</h2>
+    <ul id="files" class="list"></ul>
+    <ul id="missing" class="list muted" style="margin-top:1rem"></ul>
+    <p class="tc muted" style="margin:2rem 0">atualizado · <span id="upd"></span> · para atualizar: editar private/bordo.json e rodar npm run bordo:encrypt</p>
+  </section>
+</BaseLayout>
+
+<style>
+  .gate__form { margin-top: 3rem; max-width: 30rem; }
+  .gate__row { display: flex; gap: 0.6rem; margin-top: 0.6rem; }
+  .gate__row input { flex: 1; font: inherit; padding: 0.9rem 1rem; border: 1px solid var(--line-strong); background: var(--panel); color: var(--text); }
+  #msg { margin-top: 0.8rem; min-height: 1.2em; color: var(--alert); }
+  .sec { margin: 3rem 0 1.2rem; padding-top: 1.5rem; border-top: 1px solid var(--line); }
+  .cards { display: grid; gap: 1rem; }
+  @media (min-width: 900px) { .cards { grid-template-columns: repeat(2, 1fr); } }
+  :global(.card) { border: 1px solid var(--line-strong); padding: 1.2rem 1.4rem; display: grid; gap: 0.5rem; background: var(--panel); }
+  :global(.card .code) { font-family: var(--font-mono); font-size: 1.4rem; letter-spacing: 0.08em; }
+  :global(.card .row) { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; flex-wrap: wrap; }
+  :global(.card .note) { font-size: 0.9rem; color: var(--muted); }
+  :global(.card a) { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+  .list { display: grid; gap: 0.6rem; }
+  :global(.list li) { display: flex; justify-content: space-between; gap: 1rem; padding: 0.6rem 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  :global(.list a) { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+</style>
+
+<script>
+  const $ = (id: string) => document.getElementById(id)!;
+  const form = $('form') as HTMLFormElement;
+  const msg = $('msg');
+  const b64 = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+  const esc = (s: unknown) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+  const maps = (q: string) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+  let urls: string[] = [];
+
+  async function decrypt(password: string) {
+    const res = await fetch((document.getElementById('enc') as HTMLElement).dataset.enc!, { cache: 'no-store' });
+    if (!res.ok) throw new Error('bordo.enc não encontrado');
+    const pkg = await res.json();
+    const baseKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
+    const key = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt: b64(pkg.salt), iterations: pkg.iterations, hash: 'SHA-256' }, baseKey, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64(pkg.iv) }, key, b64(pkg.ct));
+    return JSON.parse(new TextDecoder().decode(pt));
+  }
+
+  function render(d: any) {
+    $('notice').textContent = d.notice;
+    $('upd').textContent = d.updated;
+    $('voos').innerHTML = d.voos.map((v: any) => `<article class="card"><div class="row"><span class="tc">${esc(v.cia)} · ${esc(v.voo)}</span><span class="tag ${v.status === 'emitido' ? 'ok' : 'alert'}">${esc(v.status)}</span></div><strong>${esc(v.trecho)}</strong><span>${esc(v.data)}</span><span class="code">${esc(v.codigo)}</span><span class="note">${esc(v.pax)} · ${esc(v.nota)}</span></article>`).join('');
+    $('hosp').innerHTML = d.hospedagens.map((h: any) => `<article class="card"><div class="row"><span class="tc">${esc(h.cidade)}</span><span class="code" style="font-size:1rem">${esc(h.codigo)}</span></div><strong>${esc(h.nome)}</strong><span>${esc(h.checkin)} → ${esc(h.checkout)}</span><span>${esc(h.endereco)} · <a href="${maps(h.maps)}" target="_blank" rel="noopener">maps ↗</a></span><span class="note">anfitrião: ${esc(h.anfitriao)}</span><span class="note">${esc(h.nota)}</span></article>`).join('');
+    $('ing').innerHTML = d.ingressos.map((i: any) => `<article class="card"><div class="row"><span class="tc">${esc(i.quando)}</span><span class="tag ${i.status === 'confirmado' ? 'ok' : 'alert'}">${esc(i.status)}</span></div><strong>${esc(i.evento)}</strong><span>${esc(i.onde)} · <a href="${maps(i.onde)}" target="_blank" rel="noopener">maps ↗</a></span><span class="note">${esc(i.ref)}</span><span class="note">${esc(i.nota)}</span></article>`).join('');
+    $('docs').innerHTML = d.documentos.map((x: any) => `<li><span>${esc(x.item)}</span><span class="tc" style="text-transform:none">${esc(x.status)}</span></li>`).join('');
+    $('cont').innerHTML = d.contatos.map((x: any) => `<li><span>${esc(x.nome)}</span><span class="tc" style="text-transform:none">${x.tel.startsWith('+') ? `<a href="tel:${esc(x.tel.replace(/\s/g, ''))}">${esc(x.tel)}</a>` : esc(x.tel)}</span></li>`).join('');
+    urls.forEach((u) => URL.revokeObjectURL(u));
+    urls = d.files.map((f: any) => URL.createObjectURL(new Blob([b64(f.b64)], { type: f.mime })));
+    $('files').innerHTML = d.files.map((f: any, i: number) => `<li><span>${esc(f.label)}</span><span><a href="${urls[i]}" target="_blank" rel="noopener">abrir</a> · <a href="${urls[i]}" download="${esc(f.name)}">baixar</a></span></li>`).join('');
+    $('missing').innerHTML = (d.missing || []).map((m: string) => `<li><span class="tc" style="text-transform:none">falta · ${esc(m)}</span></li>`).join('');
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    msg.textContent = 'abrindo…';
+    msg.style.color = 'var(--muted)';
+    try {
+      const d = await decrypt(($('pw') as HTMLInputElement).value);
+      render(d);
+      $('gate').hidden = true;
+      $('deck').hidden = false;
+      sessionStorage.setItem('bordo', '1');
+      window.scrollTo({ top: 0 });
+    } catch (err) {
+      msg.style.color = 'var(--alert)';
+      msg.textContent = 'senha errada, ou o arquivo cifrado não está publicado.';
+    }
+  });
+
+  $('lock').addEventListener('click', () => {
+    urls.forEach((u) => URL.revokeObjectURL(u));
+    ['voos', 'hosp', 'ing', 'docs', 'cont', 'files', 'missing'].forEach((id) => ($(id).innerHTML = ''));
+    $('deck').hidden = true;
+    $('gate').hidden = false;
+    ($('pw') as HTMLInputElement).value = '';
+    sessionStorage.removeItem('bordo');
+  });
+</script>

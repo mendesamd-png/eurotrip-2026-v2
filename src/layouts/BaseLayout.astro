@@ -1,0 +1,78 @@
+---
+import '@fontsource-variable/inter-tight';
+import '@fontsource-variable/instrument-sans';
+import '@fontsource-variable/jetbrains-mono';
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { u } from '../data/url';
+
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  accent?: string;
+  current?: string;
+  noindex?: boolean;
+}
+const { title, description, image, accent = '#EDEAE3', current, noindex = false } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = image ?? new URL(u('/og.jpg'), Astro.site).toString();
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} · Eurotrip 2026</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href={u('/favicon.svg')} type="image/svg+xml" />
+    <meta name="theme-color" content="#050505" />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Eurotrip 2026" />
+    <meta property="og:title" content={`${title} · Eurotrip 2026`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content="pt_BR" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+  </head>
+  <body style={`--accent:${accent}`}>
+    <a class="skip" href="#main">Pular para o conteúdo</a>
+    <div class="scrub" aria-hidden="true"><div class="scrub__i" id="scrub"></div></div>
+    <div class="vignette" aria-hidden="true"></div>
+    <Header current={current} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <script>
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e, i) => {
+            if (e.isIntersecting) {
+              const el = e.target as HTMLElement;
+              el.style.transitionDelay = `${Math.min(i, 5) * 80}ms`;
+              el.classList.add('in');
+              io.unobserve(el);
+            }
+          });
+        },
+        { threshold: 0.08 }
+      );
+      document.querySelectorAll('.rv, .rv-f').forEach((el) => io.observe(el));
+
+      const scrub = document.getElementById('scrub');
+      const onScroll = () => {
+        const h = document.documentElement;
+        const p = h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight);
+        if (scrub) scrub.style.width = `${(p * 100).toFixed(2)}%`;
+      };
+      addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    </script>
+  </body>
+</html>

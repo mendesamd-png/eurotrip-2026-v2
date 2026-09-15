@@ -1,0 +1,95 @@
+---
+import { chapters } from '../data/trip';
+import { u } from '../data/url';
+interface Props { current?: string }
+const { current } = Astro.props;
+const primary = chapters.map((c) => ({ href: u(`/capitulo/${c.slug}`), label: c.title, n: c.number }));
+const secondary = [
+  { href: u('/jornada'), label: 'jornada' },
+  { href: u('/kit'), label: 'kit' },
+  { href: u('/tripulacao'), label: 'tripulação' },
+  { href: u('/bordo'), label: 'bordo' },
+  { href: u('/colophon'), label: 'colophon' },
+];
+---
+
+<header class="hdr">
+  <div class="hdr__row">
+    <a href={u('/')} class="hdr__brand">
+      <span class="hdr__mark">EUROTRIP<span class="accent">·</span>26</span>
+      <span class="tc hdr__tc" id="hdr-tc">TC 00:00:00:00</span>
+    </a>
+    <nav class="hdr__nav" aria-label="Principal">
+      <ul class="hdr__ch">
+        {primary.map((l) => (
+          <li><a href={l.href} class:list={['tc-lg', 'lnk', { active: current === l.href }]}><span class="muted">{l.n}</span> {l.label}</a></li>
+        ))}
+      </ul>
+      <ul class="hdr__sec">
+        {secondary.map((l) => (
+          <li><a href={l.href} class:list={['tc', 'lnk', { active: current === l.href }]}>{l.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+    <button class="hdr__burger tc-lg" aria-expanded="false" aria-controls="menu" id="burger">menu</button>
+  </div>
+  <div class="hdr__overlay" id="menu" hidden>
+    <div class="wrap">
+      <p class="tc" style="margin-bottom:1.5rem">capítulos</p>
+      <ul class="hdr__big">
+        {primary.map((l) => (
+          <li><a href={l.href}><span class="tc">{l.n}</span>{l.label}</a></li>
+        ))}
+      </ul>
+      <ul class="hdr__small">
+        {secondary.map((l) => (<li><a href={l.href} class="tc-lg lnk">{l.label}</a></li>))}
+      </ul>
+    </div>
+  </div>
+</header>
+
+<style>
+  .hdr { position: sticky; top: 0; z-index: 70; background: rgba(5,5,5,0.78); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+  .hdr__row { display: flex; align-items: center; justify-content: space-between; gap: 2rem; padding: 0.85rem var(--gutter); }
+  .hdr__brand { display: flex; flex-direction: column; line-height: 1; gap: 0.3rem; }
+  .hdr__mark { font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; letter-spacing: -0.02em; }
+  .hdr__tc { font-size: 0.6rem; }
+  .hdr__nav { display: none; align-items: center; gap: 2rem; }
+  .hdr__nav ul { display: flex; gap: 1.2rem; }
+  .hdr__nav a { white-space: nowrap; }
+  .hdr__ch a { color: var(--text-2); }
+  .hdr__sec { padding-left: 1.5rem; border-left: 1px solid var(--line-strong); }
+  .active { color: var(--accent) !important; }
+  .active::after { transform: scaleX(1) !important; }
+  @media (min-width: 1180px) { .hdr__nav { display: flex; } .hdr__burger { display: none; } }
+  .hdr__overlay { position: fixed; inset: 0; background: var(--black); z-index: 75; padding-top: 6rem; overflow: auto; }
+  .hdr__big li { border-top: 1px solid var(--line); }
+  .hdr__big a { display: flex; gap: 1.5rem; align-items: baseline; font-family: var(--font-display); font-weight: 650; letter-spacing: -0.04em; font-size: clamp(2.2rem, 9vw, 4rem); padding: 0.45em 0; }
+  .hdr__big a:hover { color: var(--accent); }
+  .hdr__small { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--line); }
+</style>
+
+<script>
+  const b = document.getElementById('burger');
+  const m = document.getElementById('menu');
+  b?.addEventListener('click', () => {
+    const open = b.getAttribute('aria-expanded') === 'true';
+    b.setAttribute('aria-expanded', String(!open));
+    b.textContent = open ? 'menu' : 'fechar';
+    if (m) m.hidden = open;
+    document.body.style.overflow = open ? '' : 'hidden';
+  });
+  // timecode vivo no header: HH:MM:SS:FF a 24fps
+  const tc = document.getElementById('hdr-tc');
+  if (tc) {
+    const start = performance.now();
+    const tick = () => {
+      const ms = performance.now() - start;
+      const f = Math.floor((ms / 1000) * 24);
+      const ff = f % 24, s = Math.floor(f / 24) % 60, mi = Math.floor(f / 1440) % 60, h = Math.floor(f / 86400);
+      tc.textContent = `TC ${String(h).padStart(2, '0')}:${String(mi).padStart(2, '0')}:${String(s).padStart(2, '0')}:${String(ff).padStart(2, '0')}`;
+      requestAnimationFrame(tick);
+    };
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) requestAnimationFrame(tick);
+  }
+</script>

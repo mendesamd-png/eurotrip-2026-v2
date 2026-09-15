@@ -1,0 +1,36 @@
+---
+import type { Place } from '../data/trip';
+import { mapsSearch, mapsDirections } from '../data/maps';
+interface Props { places: Place[]; base?: Place; scene: string }
+const { places, base, scene } = Astro.props;
+const mode = (p: Place) => (['trilha', 'mirante', 'aeroporto'].includes(p.category) ? 'driving' : 'walking');
+---
+
+<ol class="pl">
+  {places.map((p, i) => (
+    <li class="pl__i rv-f">
+      <span class="tc pl__n">{scene}.{String(i + 1).padStart(2, '0')}</span>
+      <div class="pl__body">
+        <div class="pl__head">
+          <h3 class="t-m">{p.name}</h3>
+          <span class:list={['tag', { accent: p.category === 'base', warn: p.category === 'trabalho' }]}>{p.category}</span>
+        </div>
+        <p class="pl__blurb">{p.blurb}</p>
+        <div class="pl__links">
+          <a class="tc lnk" href={mapsSearch(p)} target="_blank" rel="noopener">abrir no maps ↗</a>
+          {base && base !== p && <a class="tc lnk" href={mapsDirections(base, p, mode(p))} target="_blank" rel="noopener">como chegar da base ↗</a>}
+        </div>
+      </div>
+    </li>
+  ))}
+</ol>
+
+<style>
+  .pl { border-top: 1px solid var(--line); }
+  .pl__i { display: grid; grid-template-columns: 4.5rem 1fr; gap: 1rem; padding: 1.6rem 0; border-bottom: 1px solid var(--line); }
+  .pl__n { padding-top: 0.55rem; }
+  .pl__head { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; flex-wrap: wrap; }
+  .pl__blurb { margin-top: 0.55rem; max-width: 62ch; color: var(--text-2); }
+  .pl__links { display: flex; gap: 1.5rem; margin-top: 0.8rem; flex-wrap: wrap; }
+  .pl__links a { color: var(--text-2); }
+</style>

@@ -1,0 +1,143 @@
+/* ------------------------------------------------------------------------
+   Eurotrip 2026 · v2 · cinema escuro
+   ------------------------------------------------------------------------ */
+:root {
+  --black: #050505;
+  --ink: #0b0b0c;
+  --panel: #131315;
+  --panel-2: #1a1a1d;
+  --line: rgba(237, 234, 227, 0.12);
+  --line-strong: rgba(237, 234, 227, 0.28);
+  --text: #edeae3;
+  --text-2: #b8b4ab;
+  --muted: #8a877f;
+  --accent: #edeae3;
+  --ok: #5fcf8a;
+  --warn: #f2b84b;
+  --alert: #ff5a45;
+
+  --font-display: 'Inter Tight Variable', 'Inter', system-ui, sans-serif;
+  --font-body: 'Instrument Sans Variable', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', Menlo, monospace;
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --gutter: clamp(1.25rem, 4vw, 4.5rem);
+  --max: 1520px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { background: var(--black); color: var(--text); font-family: var(--font-body); -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+body { margin: 0; min-height: 100vh; line-height: 1.5; font-size: clamp(1rem, 1.02vw, 1.0625rem); }
+img, video { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 600; margin: 0; letter-spacing: -0.035em; line-height: 0.95; overflow-wrap: anywhere; }
+p { margin: 0; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+::selection { background: var(--accent); color: var(--black); }
+
+.skip { position: absolute; left: -999px; top: 0; background: var(--text); color: var(--black); padding: 0.5rem 1rem; z-index: 100; }
+.skip:focus { left: 1rem; top: 1rem; }
+
+/* tipografia ---------------------------------------------------------- */
+.t-hero { font-size: clamp(2.4rem, 11vw, 12rem); overflow-wrap: anywhere; font-weight: 700; letter-spacing: -0.05em; line-height: 0.86; text-transform: uppercase; }
+.t-xl { font-size: clamp(2.6rem, 7vw, 7.5rem); font-weight: 650; letter-spacing: -0.045em; line-height: 0.9; }
+.t-l { font-size: clamp(2rem, 4.2vw, 4.2rem); letter-spacing: -0.04em; line-height: 0.95; }
+.t-m { font-size: clamp(1.4rem, 2.4vw, 2.2rem); letter-spacing: -0.03em; line-height: 1.05; font-weight: 550; }
+.t-lead { font-family: var(--font-body); font-size: clamp(1.15rem, 1.6vw, 1.5rem); line-height: 1.4; color: var(--text-2); font-weight: 400; }
+.tc { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tc-lg { font-family: var(--font-mono); font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase; font-variant-numeric: tabular-nums; }
+.tc .on, .tc-lg .on { color: var(--accent); }
+.prose { max-width: 64ch; color: var(--text-2); font-size: 1.05rem; line-height: 1.65; }
+.prose p + p { margin-top: 1.3em; }
+.prose strong { color: var(--text); font-weight: 600; }
+
+/* layout -------------------------------------------------------------- */
+.wrap { width: min(100% - 2 * var(--gutter), var(--max)); margin-inline: auto; }
+.section { padding-block: clamp(4rem, 9vh, 8rem); }
+.hr { height: 1px; background: var(--line); border: 0; margin: 0; }
+.grid-2 { display: grid; grid-template-columns: 1fr; gap: clamp(2rem, 5vw, 6rem); }
+@media (min-width: 960px) { .grid-2 { grid-template-columns: 4fr 8fr; align-items: start; } }
+.slate-row { display: flex; justify-content: space-between; gap: 1.5rem; align-items: flex-end; flex-wrap: wrap; margin-bottom: 1.5rem; }
+
+/* letterbox ----------------------------------------------------------- */
+.frame { position: relative; overflow: hidden; background: var(--panel); aspect-ratio: 2.39 / 1; }
+.frame.r16 { aspect-ratio: 16 / 9; }
+.frame.r43 { aspect-ratio: 4 / 3; }
+.frame.r45 { aspect-ratio: 4 / 5; }
+.frame img { width: 100%; height: 100%; object-fit: cover; filter: contrast(1.06) saturate(0.78) brightness(0.92); transition: transform 1.2s var(--ease), filter 600ms var(--ease); }
+.frame:hover img { transform: scale(1.025); filter: contrast(1.04) saturate(0.9) brightness(0.98); }
+.frame::after { content: ''; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 0 1px rgba(237,234,227,0.06); background: linear-gradient(180deg, rgba(5,5,5,0.15), transparent 30%, transparent 70%, rgba(5,5,5,0.45)); }
+.frame .corner { position: absolute; font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.12em; color: var(--text); opacity: 0.85; z-index: 2; text-transform: uppercase; }
+.frame .corner.tl { top: 0.8rem; left: 0.9rem; }
+.frame .corner.tr { top: 0.8rem; right: 0.9rem; }
+.frame .corner.bl { bottom: 0.8rem; left: 0.9rem; }
+.frame .corner.br { bottom: 0.8rem; right: 0.9rem; }
+.frame .rec { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--alert); margin-right: 0.4rem; animation: blink 1.6s steps(1) infinite; vertical-align: middle; }
+@keyframes blink { 50% { opacity: 0; } }
+.cap { display: flex; justify-content: space-between; gap: 1rem; padding-top: 0.7rem; }
+
+/* reveal (clip) ------------------------------------------------------- */
+.rv { clip-path: inset(0 0 100% 0); opacity: 0; transition: clip-path 900ms var(--ease), opacity 600ms var(--ease); }
+.rv.in { clip-path: inset(0 0 0 0); opacity: 1; }
+.rv-f { opacity: 0; transform: translateY(14px); transition: opacity 700ms var(--ease), transform 700ms var(--ease); }
+.rv-f.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .rv, .rv-f { clip-path: none; opacity: 1; transform: none; } }
+
+/* scrub bar (progresso do scroll) ------------------------------------- */
+.scrub { position: fixed; top: 0; left: 0; height: 2px; width: 100%; z-index: 90; background: var(--line); }
+.scrub__i { height: 100%; width: 0; background: var(--accent); transition: width 80ms linear; }
+
+/* tags, botões -------------------------------------------------------- */
+.tag { font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; padding: 0.28rem 0.6rem; border: 1px solid var(--line-strong); color: var(--text-2); white-space: nowrap; }
+.tag.accent { border-color: var(--accent); color: var(--accent); }
+.tag.ok { border-color: var(--ok); color: var(--ok); }
+.tag.warn { border-color: var(--warn); color: var(--warn); }
+.tag.alert { border-color: var(--alert); color: var(--alert); }
+.btn { display: inline-flex; align-items: center; gap: 0.7rem; font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; padding: 0.95rem 1.4rem; border: 1px solid var(--line-strong); color: var(--text); transition: all 260ms var(--ease); }
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn.solid { background: var(--text); color: var(--black); border-color: var(--text); }
+.btn.solid:hover { background: var(--accent); border-color: var(--accent); color: var(--black); }
+.lnk { position: relative; }
+.lnk::after { content: ''; position: absolute; left: 0; bottom: -3px; width: 100%; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: left; transition: transform 320ms var(--ease); }
+.lnk:hover::after { transform: scaleX(1); }
+.lnk:hover { color: var(--accent); }
+
+/* intensidade --------------------------------------------------------- */
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.dot.leve { background: var(--ok); }
+.dot.médio { background: var(--warn); }
+.dot.pesado { background: var(--alert); }
+.dot.trânsito { background: var(--text-2); }
+
+/* mapa escuro --------------------------------------------------------- */
+.map { height: clamp(440px, 68vh, 800px); width: 100%; background: var(--panel); position: relative; isolation: isolate; border: 1px solid var(--line); }
+.map .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) grayscale(1) brightness(0.62) contrast(1.15); }
+.map .leaflet-container { background: var(--panel); font-family: var(--font-body); }
+.map .leaflet-control-attribution { font-family: var(--font-mono); font-size: 9px; background: rgba(5,5,5,0.7); color: var(--muted); }
+.map .leaflet-control-attribution a { color: var(--text-2); }
+.map .leaflet-control-zoom a { background: var(--panel); color: var(--text); border-color: var(--line-strong); }
+.map .leaflet-popup-content-wrapper { background: var(--panel-2); color: var(--text); border-radius: 0; border: 1px solid var(--line-strong); box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
+.map .leaflet-popup-tip { background: var(--panel-2); }
+.map .leaflet-popup-content { margin: 0.9rem 1rem; font-size: 0.9rem; line-height: 1.4; }
+.map .leaflet-popup-content .tc { display: block; margin-bottom: 0.3rem; }
+.map .leaflet-popup-content a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.map .leaflet-popup-close-button { color: var(--text-2); }
+.pin { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px rgba(5,5,5,0.9), 0 0 0 4px var(--accent); }
+.pin.base { background: var(--text); box-shadow: 0 0 0 3px rgba(5,5,5,0.9), 0 0 0 4px var(--text); width: 14px; height: 14px; }
+.pin.trabalho { background: var(--warn); box-shadow: 0 0 0 3px rgba(5,5,5,0.9), 0 0 0 4px var(--warn); }
+.pin-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); background: rgba(5,5,5,0.85); padding: 2px 6px; white-space: nowrap; border: 1px solid var(--line-strong); }
+.leaflet-tooltip.pin-label::before { display: none; }
+
+/* utilitários --------------------------------------------------------- */
+.muted { color: var(--muted); }
+.accent { color: var(--accent); }
+.flex { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+.between { justify-content: space-between; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.vignette { position: fixed; inset: 0; pointer-events: none; z-index: 80; background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.45) 100%); }

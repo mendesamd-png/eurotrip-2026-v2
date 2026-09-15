@@ -1,0 +1,147 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Frame from '../components/Frame.astro';
+import MapView from '../components/MapView.astro';
+import { chapters, route } from '../data/trip';
+import { images, unsplash } from '../data/images';
+import { u, accentOf, timecode } from '../data/url';
+
+const hero = images.areeiro;
+const routeMarkers = route.map((r) => ({ name: r.name, lat: r.lat, lng: r.lng, kind: r.mode === 'base' || r.mode === 'carro' ? 'base' : 'rota', chapter: r.chapter, label: r.name } as const));
+const dayOf: Record<string, number> = { partida: 0, londres: 1, birmingham: 6, manchester: 7, 'san-sebastian': 12, funchal: 15, 'ponta-delgada': 18 };
+---
+
+<BaseLayout title="Diário audiovisual" description="Um diário audiovisual em seis capítulos: Londres, Birmingham, Manchester, San Sebastián, Funchal e Ponta Delgada. Outubro e novembro de 2026." image={unsplash(hero, 1200)} current={u('/')}>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero__frame">
+      <Frame k="areeiro" eager tl="REC · A7V · 24 fps" tr="TC 00:00:00:00" bl="CENA 00 · PRÓLOGO" br="2.39:1 · S-LOG3" rec />
+    </div>
+    <div class="hero__text wrap">
+      <h1 class="t-hero"><span class="hero__l1">Uma viagem</span><span class="hero__l2">meio planejada</span><span class="hero__l3">demais<span class="accent">.</span></span></h1>
+      <p class="t-lead hero__lead">Seis capítulos entre o concreto inglês, o Cantábrico e o vulcão. Dezenove noites, quatro voos, dois trabalhos e uma Super 8. Outubro e novembro de 2026.</p>
+    </div>
+  </section>
+
+  <!-- CLAQUETE -->
+  <section class="wrap slate">
+    <dl class="slate__grid">
+      <div><dt class="tc">produção</dt><dd>Rota</dd></div>
+      <div><dt class="tc">direção</dt><dd>Hugo Lima</dd></div>
+      <div><dt class="tc">fotografia</dt><dd>Douglas Mendes</dd></div>
+      <div><dt class="tc">cenas</dt><dd>06</dd></div>
+      <div><dt class="tc">noites</dt><dd>19</dd></div>
+      <div><dt class="tc">voos</dt><dd>04</dd></div>
+      <div><dt class="tc">trabalhos</dt><dd>02</dd></div>
+      <div><dt class="tc">formato</dt><dd>4K · Super 8 · 35mm</dd></div>
+    </dl>
+  </section>
+
+  <!-- SINOPSE -->
+  <section class="wrap section synopsis">
+    <p class="tc">sinopse</p>
+    <p class="t-l rv-f synopsis__t">Toda viagem longa tem a estrutura de um filme, mesmo quando ninguém planejou. O mundo comum, o chamado, o mentor, a provação, a virada no meio, o tesouro e o retorno com o HD cheio.</p>
+    <p class="t-lead rv-f" style="max-width:56ch; margin-top:1.5rem">Este caderno segue esse roteiro, cena a cena, com mapa, timeline e o que der para filmar antes de a luz acabar.</p>
+  </section>
+
+  <!-- FILM STRIP -->
+  <section class="strip">
+    <div class="wrap slate-row">
+      <div>
+        <p class="tc">as cenas</p>
+        <h2 class="t-l" style="margin-top:.4rem">Seis lugares, em ordem de travessia.</h2>
+      </div>
+      <p class="tc muted">arraste ou role para o lado →</p>
+    </div>
+    <ol class="strip__track" id="strip">
+      {chapters.map((c) => (
+        <li class="strip__item" style={`--accent:${accentOf(c.slug)}`}>
+          <a href={u(`/capitulo/${c.slug}`)} class="strip__link">
+            <Frame k={c.hero} tl={`CENA ${c.number}`} tr={`TC ${timecode(dayOf[c.slug])}`} bl={`${c.flag} ${c.city}`} br={c.dates} />
+            <div class="strip__meta">
+              <p class="tc"><span class="on">{c.act}</span> · {c.beat}</p>
+              <h3 class="t-m">{c.title}</h3>
+              <p class="strip__lead">{c.lead}</p>
+              <span class="tc lnk">ver cena →</span>
+            </div>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <!-- MAPA -->
+  <section class="wrap section">
+    <div class="slate-row">
+      <div>
+        <p class="tc">rota</p>
+        <h2 class="t-l" style="margin-top:.4rem">De Guarulhos ao norte da Madeira.</h2>
+      </div>
+      <a href={u('/jornada')} class="btn">mapa completo e timeline</a>
+    </div>
+    <MapView id="map-home" markers={routeMarkers} route={route} center={{ lat: 40, lng: -12, zoom: 4 }} fit animate />
+    <p class="tc" style="margin-top:.8rem">clique num pino para abrir no google maps · role dentro do mapa depois de clicar nele</p>
+  </section>
+
+  <!-- KIT + TRIPULAÇÃO -->
+  <section class="wrap section two">
+    <a href={u('/kit')} class="two__card rv-f">
+      <Frame k="kitCamera" ratio="16" tl="EQUIPAMENTO" br="07 ITENS" />
+      <h2 class="t-m" style="margin-top:1.2rem">Não é inventário. É elenco.</h2>
+      <p class="muted" style="margin-top:.6rem; max-width:44ch">Sony A7V, duas G Master, Insta360, DJI Mini, Olympus Trip 35 e uma Canon Super 8.</p>
+      <span class="tc lnk" style="display:inline-block; margin-top:1rem">ver o kit →</span>
+    </a>
+    <a href={u('/tripulacao')} class="two__card rv-f">
+      <div class="frame r16 two__crew"><img src={u('/images/crew/douglas.jpg')} alt="Douglas Mendes" loading="lazy" /><img src={u('/images/crew/hugo.png')} alt="Hugo Lima" loading="lazy" /><span class="corner tl">TRIPULAÇÃO</span><span class="corner br">02 PAX</span></div>
+      <h2 class="t-m" style="margin-top:1.2rem">Dois brasileiros, duas câmeras.</h2>
+      <p class="muted" style="margin-top:.6rem; max-width:44ch">A parte boa de viajar com alguém é ter uma testemunha. A parte ruim é ter uma testemunha.</p>
+      <span class="tc lnk" style="display:inline-block; margin-top:1rem">conhecer a tripulação →</span>
+    </a>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero { padding-top: 1.5rem; }
+  .hero__frame { width: min(100% - 2 * var(--gutter), var(--max)); margin-inline: auto; }
+  .hero__text { padding-block: 2.5rem 1rem; }
+  .hero h1 > span { display: block; }
+  .hero__l2 { padding-left: clamp(0rem, 12vw, 14rem); }
+  .hero__l3 { text-align: right; }
+  .hero__lead { max-width: 54ch; margin-top: 2rem; }
+
+  .slate { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding-block: 1.6rem; }
+  .slate__grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem 1rem; margin: 0; }
+  .slate__grid dd { margin: 0.35rem 0 0; font-family: var(--font-display); font-size: 1.15rem; letter-spacing: -0.02em; }
+  @media (min-width: 800px) { .slate__grid { grid-template-columns: repeat(8, 1fr); } }
+
+  .synopsis__t { max-width: 26ch; margin-top: 0.8rem; font-weight: 600; }
+
+  .strip { padding-block: 2rem 4rem; }
+  .strip__track { display: flex; gap: 1.25rem; overflow-x: auto; scroll-snap-type: x mandatory; padding: 0 var(--gutter) 1rem; scrollbar-width: none; }
+  .strip__track::-webkit-scrollbar { display: none; }
+  .strip__item { flex: 0 0 min(82vw, 720px); scroll-snap-align: start; }
+  .strip__link { display: block; }
+  .strip__meta { padding-top: 1rem; }
+  .strip__meta h3 { margin-top: 0.4rem; }
+  .strip__lead { color: var(--text-2); margin-top: 0.6rem; max-width: 46ch; }
+  .strip__meta .lnk { display: inline-block; margin-top: 0.8rem; color: var(--text-2); }
+  .strip__link:hover .t-m { color: var(--accent); }
+
+  .two { display: grid; gap: 3rem; }
+  @media (min-width: 900px) { .two { grid-template-columns: 1fr 1fr; } }
+  .two__card:hover .t-m { color: var(--accent); }
+  .two__crew { display: grid; grid-template-columns: 1fr 1fr; }
+  .two__crew img { filter: grayscale(1) contrast(1.1); }
+</style>
+
+<script>
+  // roda o mouse vertical como scroll horizontal na tira de filme
+  const s = document.getElementById('strip');
+  s?.addEventListener('wheel', (e) => {
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && s.scrollWidth > s.clientWidth) {
+      const atStart = s.scrollLeft <= 0 && e.deltaY < 0;
+      const atEnd = Math.ceil(s.scrollLeft + s.clientWidth) >= s.scrollWidth && e.deltaY > 0;
+      if (!atStart && !atEnd) { e.preventDefault(); s.scrollLeft += e.deltaY; }
+    }
+  }, { passive: false });
+</script>

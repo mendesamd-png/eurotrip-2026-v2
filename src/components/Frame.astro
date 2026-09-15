@@ -1,0 +1,41 @@
+---
+/**
+ * Letterbox 2.39:1 (padrão) com cantos de "monitor de câmera": timecode, cena, REC.
+ */
+import { images, unsplash, type ImageKey } from '../data/images';
+interface Props {
+  k: ImageKey;
+  ratio?: 'scope' | '16' | '43' | '45';
+  tl?: string; tr?: string; bl?: string; br?: string;
+  rec?: boolean;
+  caption?: string;
+  w?: number;
+  eager?: boolean;
+  class?: string;
+}
+const { k, ratio = 'scope', tl, tr, bl, br, rec = false, caption, w = 2000, eager = false, class: cls } = Astro.props;
+const img = images[k];
+const src = unsplash(img, w);
+const srcset = [800, 1200, 1800, 2400].map((s) => `${unsplash(img, s)} ${s}w`).join(', ');
+const rc = ratio === '16' ? 'r16' : ratio === '43' ? 'r43' : ratio === '45' ? 'r45' : '';
+---
+
+<figure class:list={['fig', cls]}>
+  <div class:list={['frame', rc]}>
+    <img src={src} srcset={srcset} sizes="(max-width: 900px) 100vw, 70vw" alt={img.alt} loading={eager ? 'eager' : 'lazy'} decoding="async" />
+    {tl && <span class="corner tl">{rec && <span class="rec"></span>}{tl}</span>}
+    {tr && <span class="corner tr">{tr}</span>}
+    {bl && <span class="corner bl">{bl}</span>}
+    {br && <span class="corner br">{br}</span>}
+  </div>
+  {caption !== undefined && (
+    <figcaption class="cap">
+      <span class="tc">{caption || img.alt}</span>
+      <span class="tc">unsplash · @{img.author} · placeholder</span>
+    </figcaption>
+  )}
+</figure>
+
+<style>
+  .fig { margin: 0; }
+</style>
