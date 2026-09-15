@@ -1,0 +1,51 @@
+---
+import { directionsUrl, type Leg } from '../data/transfers';
+interface Props { legs: Leg[]; numbered?: boolean }
+const { legs, numbered = true } = Astro.props;
+const tagClass = (s: Leg['status']) => (s === 'emitido' ? 'ok' : s === 'estimativa' ? '' : 'warn');
+---
+
+<ol class="legs">
+  {legs.map((l, i) => (
+    <li class="legs__i rv-f">
+      <div class="legs__n">
+        {numbered && <span class="tc">{String(i + 1).padStart(2, '0')}</span>}
+        <span class="tag legs__mode">{l.mode}</span>
+        <span class="tc">{l.date}</span>
+      </div>
+      <div class="legs__body">
+        <p class="legs__route"><strong>{l.from}</strong> <span class="muted">→</span> <strong>{l.to}</strong></p>
+        <p class="legs__time tc-lg">
+          {l.dep && <span><span class="tc">sai</span> {l.dep}</span>}
+          {l.arr && <span><span class="tc">chega</span> {l.arr}</span>}
+          {l.est && <span><span class="tc">estimativa</span> {l.est}</span>}
+        </p>
+        <p class="muted legs__how">{l.how}</p>
+        {l.note && <p class="legs__note tc">↳ {l.note}</p>}
+      </div>
+      <div class="legs__right">
+        <span class:list={['tag', tagClass(l.status)]}>{l.status}</span>
+        {l.directions && <a class="tc lnk" href={directionsUrl(l.directions)} target="_blank" rel="noopener">rota no maps ↗</a>}
+      </div>
+    </li>
+  ))}
+</ol>
+
+<style>
+  .legs { border-top: 1px solid var(--line); }
+  .legs__i { display: grid; grid-template-columns: 1fr; gap: 0.8rem; padding: 1.1rem 0; border-bottom: 1px solid var(--line); transition: background 300ms; }
+  .legs__i:hover { background: linear-gradient(90deg, var(--panel), transparent); }
+  .legs__n { display: flex; gap: 0.8rem; align-items: center; }
+  .legs__mode { color: var(--text); }
+  .legs__route { font-size: 1.05rem; }
+  .legs__time { display: flex; gap: 1.4rem; flex-wrap: wrap; margin-top: 0.35rem; color: var(--text); }
+  .legs__time .tc { margin-right: 0.3rem; }
+  .legs__how { margin-top: 0.35rem; font-size: 0.92rem; max-width: 70ch; }
+  .legs__note { margin-top: 0.4rem; text-transform: none; letter-spacing: 0.04em; font-size: 0.72rem; }
+  .legs__right { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+  @media (min-width: 900px) {
+    .legs__i { grid-template-columns: 9rem 1fr auto; gap: 1.5rem; align-items: start; }
+    .legs__n { flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+    .legs__right { flex-direction: column; align-items: flex-end; }
+  }
+</style>

@@ -3,6 +3,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Frame from '../../components/Frame.astro';
 import MapView from '../../components/MapView.astro';
 import PlaceList from '../../components/PlaceList.astro';
+import Legs from '../../components/Legs.astro';
+import { legsOf } from '../../data/transfers';
 import { chapters, days, chapterBySlug } from '../../data/trip';
 import { images, unsplash } from '../../data/images';
 import { mapsSearch } from '../../data/maps';
@@ -19,6 +21,8 @@ const base = c.places.find((p) => p.category === 'base');
 const accent = accentOf(c.slug);
 const markers = c.places.map((p) => ({ name: p.name, lat: p.lat, lng: p.lng, blurb: p.blurb, kind: p.category === 'base' ? 'base' : p.category === 'trabalho' ? 'trabalho' : 'lugar', href: mapsSearch(p) } as const));
 const firstDay = chapterDays[0]?.n ?? 0;
+const chapterLegs = legsOf(c.slug);
+const stops = c.places.filter((p) => p.category === 'base' || p.category === 'trabalho').map((p) => ({ label: p.category === 'base' ? 'base' : p.name, lat: p.lat, lng: p.lng, zoom: 15, slug: p.name }));
 ---
 
 <BaseLayout title={c.title} description={c.lead} image={unsplash(images[c.hero], 1200)} accent={accent} current={u(`/capitulo/${c.slug}`)}>
@@ -111,14 +115,28 @@ const firstDay = chapterDays[0]?.n ?? 0;
     <div class="slate-row">
       <div>
         <p class="tc">locações</p>
-        <h2 class="t-l" style="margin-top:.4rem">Lugares com identidade, não checklist.</h2>
+        <h2 class="t-l" style="margin-top:.4rem">Lugares com identidade.</h2>
       </div>
       <p class="tc">pino claro · base &nbsp; pino âmbar · trabalho &nbsp; pino cor da cena · lugar</p>
     </div>
-    <MapView id={`map-${c.slug}`} markers={markers} center={c.center} fit />
+    <MapView id={`map-${c.slug}`} markers={markers} center={c.center} fit stops={stops} />
+    <p class="tc" style="margin-top:.8rem">passe o mouse na lista abaixo para acender o pino · clique num pino para abrir no google maps</p>
     <div style="height:2rem"></div>
-    <PlaceList places={c.places} base={base} scene={c.number} />
+    <PlaceList places={c.places} base={base} scene={c.number} mapId={`map-${c.slug}`} />
   </section>
+
+  {chapterLegs.length > 0 && (
+    <section class="wrap section" style="padding-top:0">
+      <div class="slate-row">
+        <div>
+          <p class="tc">chegada e saída</p>
+          <h2 class="t-l" style="margin-top:.4rem">Como se chega, como se sai.</h2>
+        </div>
+        <p class="tc">horário de voo · bilhete &nbsp; "~" · estimativa sem trânsito</p>
+      </div>
+      <Legs legs={chapterLegs} numbered={false} />
+    </section>
+  )}
 
   <!-- trilha -->
   <section class="wrap section">

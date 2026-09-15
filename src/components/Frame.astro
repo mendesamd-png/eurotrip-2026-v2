@@ -24,7 +24,7 @@ const rc = ratio === '16' ? 'r16' : ratio === '43' ? 'r43' : ratio === '45' ? 'r
   <div class:list={['frame', rc]}>
     <img src={src} srcset={srcset} sizes="(max-width: 900px) 100vw, 70vw" alt={img.alt} loading={eager ? 'eager' : 'lazy'} decoding="async" />
     {tl && <span class="corner tl">{rec && <span class="rec"></span>}{tl}</span>}
-    {tr && <span class="corner tr">{tr}</span>}
+    {tr === 'COUNTDOWN' ? <span class="corner tr" data-countdown-tc>TC -00:00:00:00:00</span> : tr && <span class="corner tr">{tr}</span>}
     {bl && <span class="corner bl">{bl}</span>}
     {br && <span class="corner br">{br}</span>}
   </div>

@@ -9,17 +9,23 @@ import { u, accentOf, timecode } from '../data/url';
 const hero = images.areeiro;
 const routeMarkers = route.map((r) => ({ name: r.name, lat: r.lat, lng: r.lng, kind: r.mode === 'base' || r.mode === 'carro' ? 'base' : 'rota', chapter: r.chapter, label: r.name } as const));
 const dayOf: Record<string, number> = { partida: 0, londres: 1, birmingham: 6, manchester: 7, 'san-sebastian': 12, funchal: 15, 'ponta-delgada': 18 };
+const bases = ['Londres', 'Birmingham', 'Manchester', 'San Sebastián', 'Funchal', 'Ponta Delgada'];
+const stops = route.filter((r) => bases.includes(r.name)).map((r) => ({ label: r.name, lat: r.lat, lng: r.lng, zoom: 12, slug: r.name }));
 ---
 
 <BaseLayout title="Diário audiovisual" description="Um diário audiovisual em seis capítulos: Londres, Birmingham, Manchester, San Sebastián, Funchal e Ponta Delgada. Outubro e novembro de 2026." image={unsplash(hero, 1200)} current={u('/')}>
   <!-- HERO -->
   <section class="hero">
     <div class="hero__frame">
-      <Frame k="areeiro" eager tl="REC · A7V · 24 fps" tr="TC 00:00:00:00" bl="CENA 00 · PRÓLOGO" br="2.39:1 · S-LOG3" rec />
+      <Frame k="areeiro" eager tl="REC · A7V · 24 fps" tr="COUNTDOWN" bl="CENA 00 · PRÓLOGO" br="2.39:1 · S-LOG3" rec />
     </div>
     <div class="hero__text wrap">
       <h1 class="t-hero"><span class="hero__l1">Uma viagem</span><span class="hero__l2">meio planejada</span><span class="hero__l3">demais<span class="accent">.</span></span></h1>
-      <p class="t-lead hero__lead">Seis capítulos entre o concreto inglês, o Cantábrico e o vulcão. Dezenove noites, quatro voos, dois trabalhos e uma Super 8. Outubro e novembro de 2026.</p>
+      <p class="t-lead hero__lead">Seis capítulos entre o concreto inglês, o Cantábrico e o vulcão. Dezenove noites, quatro voos, dois trabalhos e uma mochila no limite. Outubro e novembro de 2026.</p>
+      <div class="hero__count">
+        <p class="tc"><span class="rec"></span>contagem regressiva · embarque GRU · 16/10 · 23:50</p>
+        <p class="t-xl count" data-countdown>--<span class="u">d</span>--<span class="u">h</span>--<span class="u">m</span>--<span class="u">s</span></p>
+      </div>
     </div>
   </section>
 
@@ -33,7 +39,7 @@ const dayOf: Record<string, number> = { partida: 0, londres: 1, birmingham: 6, m
       <div><dt class="tc">noites</dt><dd>19</dd></div>
       <div><dt class="tc">voos</dt><dd>04</dd></div>
       <div><dt class="tc">trabalhos</dt><dd>02</dd></div>
-      <div><dt class="tc">formato</dt><dd>4K · Super 8 · 35mm</dd></div>
+      <div><dt class="tc">formato</dt><dd>4K · 10-bit · S-Log3</dd></div>
     </dl>
   </section>
 
@@ -55,7 +61,7 @@ const dayOf: Record<string, number> = { partida: 0, londres: 1, birmingham: 6, m
     </div>
     <ol class="strip__track" id="strip">
       {chapters.map((c) => (
-        <li class="strip__item" style={`--accent:${accentOf(c.slug)}`}>
+        <li class="strip__item" style={`--accent:${accentOf(c.slug)}`} data-map-for="map-home" data-map-focus={c.slug === 'ponta-delgada' ? 'Ponta Delgada' : c.city}>
           <a href={u(`/capitulo/${c.slug}`)} class="strip__link">
             <Frame k={c.hero} tl={`CENA ${c.number}`} tr={`TC ${timecode(dayOf[c.slug])}`} bl={`${c.flag} ${c.city}`} br={c.dates} />
             <div class="strip__meta">
@@ -79,16 +85,16 @@ const dayOf: Record<string, number> = { partida: 0, londres: 1, birmingham: 6, m
       </div>
       <a href={u('/jornada')} class="btn">mapa completo e timeline</a>
     </div>
-    <MapView id="map-home" markers={routeMarkers} route={route} center={{ lat: 40, lng: -12, zoom: 4 }} fit animate />
-    <p class="tc" style="margin-top:.8rem">clique num pino para abrir no google maps · role dentro do mapa depois de clicar nele</p>
+    <MapView id="map-home" markers={routeMarkers} route={route} center={{ lat: 40, lng: -12, zoom: 4 }} fit animate stops={stops} />
+    <p class="tc" style="margin-top:.8rem">▶ percorre a rota · os atalhos voam até cada base · clique num pino para abrir no google maps · role dentro do mapa depois de clicar nele</p>
   </section>
 
   <!-- KIT + TRIPULAÇÃO -->
   <section class="wrap section two">
     <a href={u('/kit')} class="two__card rv-f">
-      <Frame k="kitCamera" ratio="16" tl="EQUIPAMENTO" br="07 ITENS" />
-      <h2 class="t-m" style="margin-top:1.2rem">Não é inventário. É elenco.</h2>
-      <p class="muted" style="margin-top:.6rem; max-width:44ch">Sony A7V, duas G Master, Insta360, DJI Mini, Olympus Trip 35 e uma Canon Super 8.</p>
+      <Frame k="kitCamera" ratio="16" tl="EQUIPAMENTO" br="04 ITENS" />
+      <h2 class="t-m" style="margin-top:1.2rem">Elenco, com protagonista e coadjuvante.</h2>
+      <p class="muted" style="margin-top:.6rem; max-width:44ch">Sony A7V, duas G Master e uma Insta360. Cada peça entra numa cena e fica fora das outras.</p>
       <span class="tc lnk" style="display:inline-block; margin-top:1rem">ver o kit →</span>
     </a>
     <a href={u('/tripulacao')} class="two__card rv-f">
@@ -108,6 +114,8 @@ const dayOf: Record<string, number> = { partida: 0, londres: 1, birmingham: 6, m
   .hero__l2 { padding-left: clamp(0rem, 12vw, 14rem); }
   .hero__l3 { text-align: right; }
   .hero__lead { max-width: 54ch; margin-top: 2rem; }
+  .hero__count { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 0.6rem; }
+  .hero__count .count { font-size: clamp(2.2rem, 6vw, 6rem); }
 
   .slate { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding-block: 1.6rem; }
   .slate__grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem 1rem; margin: 0; }

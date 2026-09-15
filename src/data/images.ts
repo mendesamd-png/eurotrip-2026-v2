@@ -35,9 +35,6 @@ export const images = {
   saoLourenco: { id: 'photo-1583570986513-be4e73a452b3', alt: 'Ponta de São Lourenço, terra vulcânica e mar', author: 'kefiijrw' },
   kitCamera: { id: 'photo-1697311622332-184b7bb19a46', alt: 'Câmera Sony sobre tecido', author: 'mattmutluu' },
   kitLente: { id: 'photo-1617468264204-92588bd6485a', alt: 'Lente de câmera', author: 'photofeaver' },
-  kitDrone: { id: 'photo-1599403868569-30dae419c0a7', alt: 'Drone branco e preto no ar', author: 'benofthenorth' },
-  kitAnalogica: { id: 'photo-1775296779604-7c6eb1eb7985', alt: 'Olympus Trip 35 numa prateleira', author: 'davidclode' },
-  kitSuper8: { id: 'photo-1654197308647-e10569aa987a', alt: 'Mão segurando câmera Super 8 em fundo preto', author: 'momheise' },
 } satisfies Record<string, Img>;
 
 export type ImageKey = keyof typeof images;

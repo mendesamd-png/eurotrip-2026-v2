@@ -3,19 +3,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import MapView from '../components/MapView.astro';
 import { chapters, days, route } from '../data/trip';
 import { mapsSearch } from '../data/maps';
+import Legs from '../components/Legs.astro';
+import { legs } from '../data/transfers';
 import { u, accentOf } from '../data/url';
 
 const allPlaces = chapters.flatMap((c) => c.places.map((p) => ({ name: p.name, lat: p.lat, lng: p.lng, blurb: p.blurb, kind: p.category === 'base' ? 'base' : p.category === 'trabalho' ? 'trabalho' : 'lugar', chapter: c.title, href: mapsSearch(p) } as const)));
-const legs = [
-  { from: 'São Paulo', to: 'Londres', how: 'LATAM LA 8084 · 16/10 23:50 → 17/10 15:05', mode: 'voo', status: 'emitido' },
-  { from: 'Londres', to: 'Birmingham', how: 'Trem Euston → New Street · 22/10 · ~1h25', mode: 'trem', status: 'a comprar' },
-  { from: 'Birmingham', to: 'Manchester', how: 'Trem New Street → Piccadilly · 23/10 · ~1h30', mode: 'trem', status: 'a comprar' },
-  { from: 'Manchester', to: 'Bilbao', how: 'KLM via Amsterdã · 28/10 10:55 → 16:30', mode: 'voo', status: 'emitido' },
-  { from: 'Bilbao', to: 'San Sebastián', how: 'Carro · AP-8 · ~100 km · ~1h', mode: 'carro', status: 'a reservar' },
-  { from: 'Bilbao', to: 'Funchal', how: 'TAP via Lisboa · 31/10 12:25 → 17:10', mode: 'voo', status: 'emitido' },
-  { from: 'Funchal', to: 'Ponta Delgada', how: 'Carro · 39 km · ~37 min', mode: 'carro', status: 'a reservar' },
-  { from: 'Funchal', to: 'São Paulo', how: 'TAP via Lisboa · 05/11 18:10 → 06/11 manhã', mode: 'voo', status: 'emitido' },
-];
+const bases = ['Londres', 'Birmingham', 'Manchester', 'San Sebastián', 'Funchal', 'Ponta Delgada'];
+const stops = route.filter((r) => bases.includes(r.name)).map((r) => ({ label: r.name, lat: r.lat, lng: r.lng, zoom: 12, slug: r.name }));
+
 ---
 
 <BaseLayout title="A jornada" description="Mapa interativo e timeline dia a dia: 19 noites entre Londres, Birmingham, Manchester, San Sebastián e Madeira." current={u('/jornada')}>
@@ -41,21 +36,17 @@ const legs = [
       <div><p class="tc">mapa</p><h2 class="t-l" style="margin-top:.4rem">Todas as locações, todas as bases.</h2></div>
       <p class="tc">pino claro · base &nbsp; âmbar · trabalho &nbsp; linha · rota</p>
     </div>
-    <MapView id="map-all" markers={allPlaces} route={route} center={{ lat: 44, lng: -8, zoom: 5 }} fit animate />
+    <MapView id="map-all" markers={allPlaces} route={route} center={{ lat: 44, lng: -8, zoom: 5 }} fit animate stops={stops} />
+    <p class="tc" style="margin-top:.8rem">▶ percorre a rota inteira · os atalhos voam até cada base · clique num pino para abrir no google maps</p>
   </section>
 
   <section class="wrap section" style="padding-top:0">
-    <p class="tc">deslocamentos</p>
-    <h2 class="t-l" style="margin:.4rem 0 1.5rem">Oito trechos, três modos.</h2>
-    <ol class="legs">
-      {legs.map((l, i) => (
-        <li class="legs__i rv-f">
-          <span class="tc">{String(i + 1).padStart(2, '0')} · {l.mode}</span>
-          <span><strong>{l.from} → {l.to}</strong><br /><span class="muted">{l.how}</span></span>
-          <span class:list={['tag', { ok: l.status === 'emitido', warn: l.status !== 'emitido' }]}>{l.status}</span>
-        </li>
-      ))}
-    </ol>
+    <div class="slate-row">
+      <div><p class="tc">deslocamentos</p><h2 class="t-l" style="margin-top:.4rem">Porta a porta, com hora de chegada.</h2></div>
+      <p class="tc">horário de voo · bilhete &nbsp; "~" · estimativa sem trânsito, google maps</p>
+    </div>
+    <Legs legs={legs} />
+    <p class="tc muted" style="margin-top:1.5rem">tempos terrestres são estimativas e mudam com trânsito, greve e domingo inglês. os horários de voo vêm dos bilhetes emitidos.</p>
   </section>
 
   <section class="wrap section" style="padding-top:0">
@@ -97,8 +88,6 @@ const legs = [
   .acts__i { background: var(--black); padding: 1.2rem; display: flex; flex-direction: column; gap: 0.5rem; transition: background 300ms; }
   .acts__i:hover { background: var(--panel); }
   .acts__n { font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; letter-spacing: -0.05em; color: var(--accent); line-height: 1; }
-  .legs { border-top: 1px solid var(--line); }
-  .legs__i { display: grid; grid-template-columns: 7rem 1fr auto; gap: 1rem; align-items: center; padding: 1rem 0; border-bottom: 1px solid var(--line); }
   .tl { border-top: 1px solid var(--line); }
   .tl__i { display: grid; grid-template-columns: 6.5rem 1fr; gap: 1.5rem; padding: 1.5rem 0; border-bottom: 1px solid var(--line); }
   .tl__left { display: flex; flex-direction: column; gap: 0.4rem; align-items: flex-start; }
