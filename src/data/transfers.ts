@@ -50,8 +50,8 @@ export const legs: Leg[] = [
   { chapter: 'ponta-delgada', date: '03/11', from: 'São Martinho, Funchal', to: 'Ponta Delgada, costa norte', mode: 'carro', est: '~37 min', how: 'VR1 e túneis da ER104, 39 km', status: 'estimativa', directions: dir('Rua Velha da Ajuda 28, Funchal', 'Ponta Delgada, Madeira', 'driving'), note: 'Check-out 11:00, check-in 15:00: a manhã serve para o Areeiro ou para a Zona Velha' },
   // ---- volta
   { chapter: 'ponta-delgada', date: '05/11', from: 'Ponta Delgada', to: 'FNC · Madeira', mode: 'carro', est: '~43 min', how: '39 km pela costa e VR1. Devolução do carro no aeroporto', status: 'estimativa', directions: dir('Ponta Delgada, Madeira', 'Madeira Airport', 'driving'), note: 'Voo às 18:10: devolver o carro até as 16:00' },
-  { chapter: 'ponta-delgada', date: '05/11', from: 'FNC · Madeira', to: 'LIS · Lisboa', mode: 'voo', dep: '18:10', arr: 'a confirmar', how: 'TAP TP1692 · ~1h50 de voo', status: 'a confirmar', note: 'Horário de chegada e conexão em Lisboa ficam fora do bilhete que temos. Conferir no e-ticket' },
-  { chapter: 'ponta-delgada', date: '05/11', from: 'LIS · Lisboa', to: 'GRU · Guarulhos', mode: 'voo', dep: 'a confirmar', arr: 'manhã de 06/11', how: 'TAP TP87 · ~10h de voo · −4h de fuso', status: 'a confirmar' },
+  { chapter: 'ponta-delgada', date: '05/11', from: 'FNC · Madeira', to: 'LIS · Lisboa', mode: 'voo', dep: '18:10', arr: '19:55', how: 'TAP TP1692 · 1h45 de voo', status: 'emitido', note: 'Conexão de 3h30 em Lisboa' },
+  { chapter: 'ponta-delgada', date: '05/11', from: 'LIS · Lisboa', to: 'GRU · Guarulhos', mode: 'voo', dep: '23:25', arr: '06:50 (06/11)', how: 'TAP TP87 · 10h25 de voo · −3h de fuso', status: 'emitido', note: 'Em GRU: canal vermelho com o recibo da e-DBV' },
 ];
 
 export const legsOf = (chapter: string) => legs.filter((l) => l.chapter === chapter);
